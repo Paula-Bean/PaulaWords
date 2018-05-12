@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Test</title>
+        <script src="jquery-3.3.1.min.js" charset="utf-8"></script>
+        <style>
+            body {
+                padding: 1em;
+                font-family: "ITC Officina Sans Std", "Comic Sans MS";
+                font-size: 21px;
+                }
+            .forkme {
+                position: fixed;
+                right: 0px;
+                bottom: 0px;
+                }
+            div.square {
+                width: 3em;
+                height: 3em;
+                border-top: 1px solid black;
+                border-left: 1px solid black;
+                text-align: center;
+                display:table-cell;
+                vertical-align:middle;
+                }
+            .square:last-child {
+                border-right: 1px solid black;
+                }
+            .row:last-child .square {
+                border-bottom: 1px solid black;
+                }
+            .black {
+                background-color: #aaa;
+                }
+        </style>
+        <script>
+
+var rows=8, cols=7;
+
+$(function() {
+    initializegrid(rows, cols);
+    $("#output").text(`Initialized grid of ${rows} rows by ${cols} columns`);
+    });
+
+function isodd(x) {
+    return x % 2;
+    }
+
+function togglesquares(origrow, origcol, mirrors) {
+    var origid = `#${origrow}-${origcol}`;
+    if ($(origid).hasClass("black")) {
+        $(origid).removeClass("black");
+        mirrors.forEach(function(square) {
+            var mirrid = `#${square[0]}-${square[1]}`;
+            $(mirrid).removeClass("black");
+            });
+        }
+    else {
+        $(origid).addClass("black");
+        mirrors.forEach(function(square) {
+            var mirrid = `#${square[0]}-${square[1]}`;
+            $(mirrid).addClass("black");
+            });
+        }
+    }
+
+function sqclick(o) {
+    var parts = o.id.split("-");
+    var row = parseInt(parts[0]);
+    var col = parseInt(parts[1]);
+    var mirrors = [];
+
+    // Symmetry: horizontal reflectional
+    var mirrcol, halfcol = cols / 2;
+    if (col < halfcol)
+        mirrcol = cols - col - 1;
+    else
+        mirrcol = halfcol - (col - halfcol) - 1;
+    mirrors.push([row, mirrcol]);
+
+    // Symmetry: vertical reflectional
+    var mirrrow, halfrow = rows / 2;
+    if (row < halfrow)
+        mirrrow = rows - row - 1;
+    else
+        mirrrow = halfrow - (row - halfrow) - 1;
+    mirrors.push([mirrrow, col]);
+
+    // if both...
+    mirrors.push([mirrrow, mirrcol]);
+
+    togglesquares(row, col, mirrors);
+    }
+
+function initializegrid(rows, cols) {
+    var puz = $("#puzzle");
+    puz.empty();
+    for (var row=0; row<rows; row++) {
+        var rowdiv = $("<div id='"+row+"' class='row'></div>");
+        for (col=0; col<cols; col++) {
+            var sqdiv = $("<div id='"+row+"-"+col+"' class='square' onclick='sqclick(this);'>"+row+"-"+col+"</div>");
+            rowdiv.append(sqdiv);
+            }
+        puz.append(rowdiv);
+       }
+   }
+
+        </script>
+    </head>
+    <body>
+        <h2>symmetrical interactive crossword grid designer</h2>
+
+        <p id="output"></p>
+
+        <div id="puzzle">
+        </div>
+
+        <p>See <a target="_blank" href="https://en.wikipedia.org/wiki/Symmetry">Symmetry</a> on Wikipedia.</p>
+        <a target="_blank" href="#"><img class="forkme" src="bamboo-fork-125.png" alt="Bamboo fork" title="Fork me!"></a>
+    </body>
+</html>
