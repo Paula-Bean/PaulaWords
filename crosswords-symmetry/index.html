@@ -7,8 +7,8 @@
         <style>
             body {
                 padding: 1em;
-                font-family: "ITC Officina Sans Std", "Comic Sans MS";
-                font-size: 21px;
+                font-family: "Ubuntu", "Comic Sans MS";
+                font-size: 24px;
                 }
             .forkme {
                 position: fixed;
@@ -33,18 +33,59 @@
             .black {
                 background-color: #aaa;
                 }
+            fieldset {
+                border: none;
+                }
         </style>
         <script>
 
-var rows=8, cols=7;
+var rows=9, cols=9;
+
+// Active symmetries
+
+// These two can be applied on their own, or both
+var hor_refl = true;
+var ver_refl = true;
+
+// These two are mutually exclusive
+var rot_90 = false; // includes rot_180 symmetry
+var rot_180 = false;
 
 $(function() {
-    initializegrid(rows, cols);
+    initializegrid();
     $("#output").text(`Initialized grid of ${rows} rows by ${cols} columns`);
     });
 
 function isodd(x) {
     return x % 2;
+    }
+
+function symmetrychange(o) {
+    switch (o.value) {
+        case "none":
+            hor_refl = ver_refl = rot_90 = rot_180 = false;
+            break;
+        case "hor":
+            hor_refl = true;
+            ver_refl = rot_90 = rot_180 = false;
+            break;
+        case "ver":
+            ver_refl = true;
+            hor_refl = rot_90 = rot_180 = false;
+            break;
+        case "horver":
+            ver_refl = hor_refl = true;
+            rot_90 = rot_180 = false;
+            break;
+        case "90":
+            rot_90 = true;
+            ver_refl = hor_refl = rot_180 = false;
+            break;
+        case "180":
+            rot_180 = true;
+            ver_refl = hor_refl = rot_90 = false;
+            break;
+        }
     }
 
 function togglesquares(origrow, origcol, mirrors) {
@@ -71,29 +112,77 @@ function sqclick(o) {
     var col = parseInt(parts[1]);
     var mirrors = [];
 
+    var halfcol = cols / 2, halfrow = rows / 2;
+    var mirrrow, mirrcol;
+
     // Symmetry: horizontal reflectional
-    var mirrcol, halfcol = cols / 2;
-    if (col < halfcol)
-        mirrcol = cols - col - 1;
-    else
-        mirrcol = halfcol - (col - halfcol) - 1;
-    mirrors.push([row, mirrcol]);
+    if (hor_refl) {
+        if (col < halfcol)
+            mirrcol = cols - col - 1;
+        else
+            mirrcol = halfcol - (col - halfcol) - 1;
+        mirrors.push([row, mirrcol]);
+        }
 
     // Symmetry: vertical reflectional
-    var mirrrow, halfrow = rows / 2;
-    if (row < halfrow)
-        mirrrow = rows - row - 1;
-    else
-        mirrrow = halfrow - (row - halfrow) - 1;
-    mirrors.push([mirrrow, col]);
+    if (ver_refl) {
+        if (row < halfrow)
+            mirrrow = rows - row - 1;
+        else
+            mirrrow = halfrow - (row - halfrow) - 1;
+        mirrors.push([mirrrow, col]);
+        }
 
-    // if both...
-    mirrors.push([mirrrow, mirrcol]);
+    // if both reflections:
+    if (hor_refl && ver_refl)
+        mirrors.push([mirrrow, mirrcol]);
+
+    // Rotational 90-degrees Symmetry
+    if (rot_90) {
+        // 90
+        mirrrow = cols - col - 1;
+        mirrcol = row;
+        mirrors.push([mirrrow, mirrcol]);
+
+        // 180
+        if (col < halfcol) // notice this is the same as horizontal reflection
+            mirrcol = cols - col - 1;
+        else
+            mirrcol = halfcol - (col - halfcol) - 1;
+        if (row < halfrow) // this is the same as vertical reflection
+            mirrrow = rows - row - 1;
+        else
+            mirrrow = halfrow - (row - halfrow) - 1;
+        mirrors.push([mirrrow, mirrcol]);
+
+        //  270
+        mirrrow = col;
+        mirrcol = cols - row - 1;
+        mirrors.push([mirrrow, mirrcol]);
+        }
+
+    // Rotational 180-degree
+    if (rot_180) {
+        // notice this is the same as horizontal reflection
+        if (col < halfcol)
+            mirrcol = cols - col - 1;
+        else
+            mirrcol = halfcol - (col - halfcol) - 1;
+
+        // this is the same as vertical reflection
+        if (row < halfrow)
+            mirrrow = rows - row - 1;
+        else
+            mirrrow = halfrow - (row - halfrow) - 1;
+
+        mirrors.push([mirrrow, mirrcol]);
+        }
+
 
     togglesquares(row, col, mirrors);
     }
 
-function initializegrid(rows, cols) {
+function initializegrid() {
     var puz = $("#puzzle");
     puz.empty();
     for (var row=0; row<rows; row++) {
@@ -116,7 +205,21 @@ function initializegrid(rows, cols) {
         <div id="puzzle">
         </div>
 
+
+        <fieldset>
+            Symmetry:
+            <select id="symmetry" onchange="symmetrychange(this);">
+                <option value="none">None</option>
+                <option value="hor">Horizontal reflection</option>
+                <option value="ver">Vertical reflection</option>
+                <option value="horver" selected>Horizontal and Vertical reflection</option>
+                <option value="90">90 degrees rotation</option>
+                <option value="180">180 degrees rotation</option>
+            </select>
+            <button onclick="initializegrid();">Clear grid</button>
+        </fieldset>
+
         <p>See <a target="_blank" href="https://en.wikipedia.org/wiki/Symmetry">Symmetry</a> on Wikipedia.</p>
-        <a target="_blank" href="#"><img class="forkme" src="bamboo-fork-125.png" alt="Bamboo fork" title="Fork me!"></a>
+        <a target="_blank" href="#"><img class="forkme" src="bamboo-fork-250.png" alt="Bamboo fork" title="Fork me!"></a>
     </body>
 </html>
