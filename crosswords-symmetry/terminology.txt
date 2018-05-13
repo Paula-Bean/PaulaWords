@@ -1,0 +1,7 @@
+The standard cryptic grid is a blocked grid – that is, within the grid there is a pattern of black-and-white squares.
+
+Each square is called a cell.
+
+Series of white squares into which answers are entered are called lights.
+
+The black squares are called darks, blacks, or blocks.

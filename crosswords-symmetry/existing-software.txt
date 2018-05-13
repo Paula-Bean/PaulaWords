@@ -1,0 +1,13 @@
+https://en.wikipedia.org/wiki/Crossword
+
+Software
+
+Software that aids in creating crossword puzzles has been written since at least 1976;[67] one popular example was Crossword Magic for the Apple II in the 1980s.[68] The earliest software relied on people to input a list of fill words and clues, and automatically maps the answers onto a suitable grid. This is a search problem in computer science because there are many possible arrangements to be checked against the rules of construction. Any given set of answers might have zero, one, or multiple legal arrangements.
+
+In the late 1990s, the transition began from mostly hand-created arrangements to computer-assisted, which creators generally say has allowed authors to produce more interesting and creative puzzles, reducing crosswordese.[69] Crossword Weaver was patented in 1997.[70] Crossdown [71] and Crossword Compiler for Windows (which also handles sudoku) and Crossfire for MacOS are popular for this purpose.[69]
+
+Modern software includes large databases of clues and answers, allowing the computer to randomly select words for the puzzle, potentially with guidance from the user as to the theme or a specific set of words to pick with greater probability. Many serious users add words to the database as an expression of personal creativity or for use in a desired theme. Software can also be used to assist the user in finding words for a specific spot in an arrangement by quickly searching through the dictionary for all words that fit.[69]
+
+The program Dr.Fill was written in the 2000s to solve crossword puzzles using a similar database of past clues and answers, plus the full contents of a dictionary and Wikipedia.
+
+Web sites such as crosswordguru.com make such databases available for people to create or solve puzzles with computer assistance one clue at a time.
