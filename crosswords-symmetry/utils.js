@@ -72,3 +72,27 @@ function horizontal_wordlen(r, c) {
         }
     return len;
     }
+
+
+
+function determinelights()
+{
+    // Assign numbers to cells which can be a start of a light (either horizontal or vertical)
+    lightstarts = new Map(); // Mapping from [r, c] => assigned number
+    nr = 1;
+    for (var r=0; r<rows; r++)
+        for (var c=0; c<cols; c++)
+            if (is_start_cell(r, c)) {
+                lightstarts.set([r,c], nr);
+                nr += 1;
+                }
+    // Build list of lights.
+    lights = [];
+    for (var r=0; r<rows; r++)
+        for (var c=0; c<cols; c++) {
+            if (is_vertical_startcell(r, c))
+                lights.push(["v", r, c, vertical_wordlen(r, c)]);
+            if (is_horizontal_startcell(r, c))
+                lights.push(["h", r, c, horizontal_wordlen(r, c)]);
+            }
+    }

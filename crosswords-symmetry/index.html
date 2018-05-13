@@ -5,6 +5,8 @@
         <title>Test</title>
         <script src="jquery-3.3.1.min.js" charset="utf-8"></script>
         <script src="utils.js" charset="utf-8"></script>
+        <script src="defaultpuzzlewords.js" charset="utf-8"></script>
+        <script src="puzzlewords.js" charset="utf-8"></script>
         <style>
             body {
                 padding: 1em;
@@ -56,6 +58,8 @@
         <script>
 
 var rows=8, cols=8;
+var lightstarts; // Mapping from [r, c] => assigned number
+var lights; // List of lights [[orientation h/v, start row, start col, length of light]]
 
 // Active symmetries
 
@@ -103,6 +107,7 @@ function symmetrychange(o) {
         }
     }
 
+
 function togglesquares(origrow, origcol, mirrors) {
     var origid = `#${origrow}-${origcol}`;
     if ($(origid).hasClass("black")) {
@@ -120,6 +125,7 @@ function togglesquares(origrow, origcol, mirrors) {
             });
         }
     }
+
 
 function sqclick(o) {
     var parts = o.id.split("-");
@@ -196,55 +202,42 @@ function sqclick(o) {
     togglesquares(row, col, mirrors);
 
     // Recompute numbers for the lights.
-    lightsnumbers();
+    determinelights();
+    displaylights();
     }
 
 
-
-
-function lightsnumbers()
-{
-    // Assign numbers to cells which can be a start of a light (either horizontal or vertical)
-    var lightstarts = new Map(); // Mapping from [r, c] => assigned number
+function displaylights() {
     $(".number").text("");
     $(".letter").text("");
-    nr = 1;
-    for (var r=0; r<rows; r++)
-        for (var c=0; c<cols; c++)
-            if (is_start_cell(r, c)) {
-                var id = `#${r}-${c}`;
-                $(id + " .number").text(nr);
-                lightstarts[[r,c]] = nr;
-                nr += 1;
-                }
-    // $("#output").text(""); $("#output").text(lightstarts[[1,1]]);
 
-    // Build list of lights
-    var lights = [];
-    for (var r=0; r<rows; r++)
-        for (var c=0; c<cols; c++) {
-            if (is_vertical_startcell(r, c))
-                lights.push(["v", r, c, vertical_wordlen(r, c)]);
-            if (is_horizontal_startcell(r, c))
-                lights.push(["h", r, c, horizontal_wordlen(r, c)]);
-            }
-
-    // Format lights
-    var s = "<b>Across</b><br>";
-    lights.forEach(function f(light) { // TODO: use filter in chain
-        var orientation, r, c, len;
-        [orientation, r, c, len] = light;
-        if (light[0] == "h")
-            s += lightstarts[[light[1], light[2]]] + `. WORD of length ${len} starting at ${r},${c}` + "<br>";
+    lightstarts.forEach((value, key) => {
+        var r, c;
+        [r, c] = key;
+        var id = `#${r}-${c}`;
+        $(id + " .number").text(value);
         });
+
+    // Format human-readable lights.
+    var s = "<b>Across</b><br>";
+    lights.filter((light) => {
+            return light[0] == "h";
+            })
+        .forEach((light) => {
+            var orientation, r, c, len;
+            [orientation, r, c, len] = light;
+            s += lightstarts[[light[1], light[2]]] + `. WORD of length ${len} starting at ${r},${c}` + "<br>";
+            });
 
     s += "<b>Down</b><br>";
-    lights.forEach(function f(light) { // TODO: use filter in chain
-        var orientation, r, c, len;
-        [orientation, r, c, len] = light;
-        if (light[0] == "v")
+    lights.filter((light) => {
+            return light[0] == "v";
+            })
+        .forEach((light) => {
+            var orientation, r, c, len;
+            [orientation, r, c, len] = light;
             s += lightstarts[[light[1], light[2]]] + `. WORD of length ${len} starting at ${r},${c}` + "<br>";
-        });
+            });
 
     $("#output").html(s);
 }
