@@ -4,11 +4,12 @@
         <meta charset="utf-8">
         <title>Test</title>
         <script src="jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="utils.js" charset="utf-8"></script>
         <style>
             body {
                 padding: 1em;
                 font-family: "Ubuntu", "Comic Sans MS";
-                font-size: 24px;
+                font-size: 16px;
                 }
             .forkme {
                 position: fixed;
@@ -23,9 +24,18 @@
                 text-align: center;
                 display:table-cell;
                 vertical-align:middle;
+                position: relative;
                 }
             .square:last-child {
                 border-right: 1px solid black;
+                }
+            .square .number {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                font-size: 80%;
+                }
+            .square .letter {
                 }
             .row:last-child .square {
                 border-bottom: 1px solid black;
@@ -36,29 +46,34 @@
             fieldset {
                 border: none;
                 }
+            .dimension {
+                width: 2.5em;
+                background-color: #eee;
+                border: 1px solid #aaa;
+                padding: 2px 8px;
+                }
         </style>
         <script>
 
-var rows=9, cols=9;
+var rows=8, cols=8;
 
 // Active symmetries
 
 // These two can be applied on their own, or both
-var hor_refl = true;
-var ver_refl = true;
+var hor_refl = false;
+var ver_refl = false;
 
 // These two are mutually exclusive
 var rot_90 = false; // includes rot_180 symmetry
-var rot_180 = false;
+var rot_180 = true;
 
 $(function() {
+    $("#cols").val("8");
+    $("#rows").val("8");
     initializegrid();
     $("#output").text(`Initialized grid of ${rows} rows by ${cols} columns`);
     });
 
-function isodd(x) {
-    return x % 2;
-    }
 
 function symmetrychange(o) {
     switch (o.value) {
@@ -178,18 +193,80 @@ function sqclick(o) {
         mirrors.push([mirrrow, mirrcol]);
         }
 
-
     togglesquares(row, col, mirrors);
+
+    // Recompute numbers for the lights.
+    lightsnumbers();
     }
 
+
+
+
+function lightsnumbers()
+{
+    // Assign numbers to cells which can be a start of a light (either horizontal or vertical)
+    var lightstarts = new Map(); // Mapping from [r, c] => assigned number
+    $(".number").text("");
+    $(".letter").text("");
+    nr = 1;
+    for (var r=0; r<rows; r++)
+        for (var c=0; c<cols; c++)
+            if (is_start_cell(r, c)) {
+                var id = `#${r}-${c}`;
+                $(id + " .number").text(nr);
+                lightstarts[[r,c]] = nr;
+                nr += 1;
+                }
+    // $("#output").text(""); $("#output").text(lightstarts[[1,1]]);
+
+    // Build list of lights
+    var lights = [];
+    for (var r=0; r<rows; r++)
+        for (var c=0; c<cols; c++) {
+            if (is_vertical_startcell(r, c))
+                lights.push(["v", r, c, vertical_wordlen(r, c)]);
+            if (is_horizontal_startcell(r, c))
+                lights.push(["h", r, c, horizontal_wordlen(r, c)]);
+            }
+
+    // Format lights
+    var s = "<b>Across</b><br>";
+    lights.forEach(function f(light) { // TODO: use filter in chain
+        var orientation, r, c, len;
+        [orientation, r, c, len] = light;
+        if (light[0] == "h")
+            s += lightstarts[[light[1], light[2]]] + `. WORD of length ${len} starting at ${r},${c}` + "<br>";
+        });
+
+    s += "<b>Down</b><br>";
+    lights.forEach(function f(light) { // TODO: use filter in chain
+        var orientation, r, c, len;
+        [orientation, r, c, len] = light;
+        if (light[0] == "v")
+            s += lightstarts[[light[1], light[2]]] + `. WORD of length ${len} starting at ${r},${c}` + "<br>";
+        });
+
+    $("#output").html(s);
+}
+
+
 function initializegrid() {
+    cols = parseInt($("#cols").val());
+    rows = parseInt($("#rows").val());
+
     var puz = $("#puzzle");
     puz.empty();
+    var nr = 0;
     for (var row=0; row<rows; row++) {
-        var rowdiv = $("<div id='"+row+"' class='row'></div>");
+        var rowdiv = $(`<div id='${row}' class='row'></div>`);
         for (col=0; col<cols; col++) {
-            var sqdiv = $("<div id='"+row+"-"+col+"' class='square' onclick='sqclick(this);'>"+row+"-"+col+"</div>");
+            var sqdiv = $(
+                `<div id='${row}-${col}' class='square' onclick='sqclick(this);'>
+                    <span class="number">${nr}</span>
+                    <span class="letter">${row}-${col}</span>
+                </div>`);
             rowdiv.append(sqdiv);
+            nr += 1;
             }
         puz.append(rowdiv);
        }
@@ -199,27 +276,33 @@ function initializegrid() {
     </head>
     <body>
         <h2>symmetrical interactive crossword grid designer</h2>
+        <form>
+            <fieldset>
+                Dimensions:
+                <input id="cols" class="dimension" type="text" onchange="initializegrid();"> colums
+                by
+                <input id="rows" class="dimension" type="text" onchange="initializegrid();"> rows.
+                <button onclick="initializegrid();">Clear grid</button>
+            </fieldset>
+
+            <fieldset>
+                Symmetry:
+                <select id="symmetry" onchange="symmetrychange(this);">
+                    <option value="180" selected>180 degrees rotation</option>
+                    <option value="90">90 degrees rotation</option>
+                    <option value="hor">Horizontal reflection</option>
+                    <option value="ver">Vertical reflection</option>
+                    <option value="horver">Horizontal and Vertical reflection</option>
+                    <option value="none">None</option>
+                </select>
+
+            </fieldset>
+        </form>
+
+        <div id="puzzle"></div>
 
         <p id="output"></p>
 
-        <div id="puzzle">
-        </div>
-
-
-        <fieldset>
-            Symmetry:
-            <select id="symmetry" onchange="symmetrychange(this);">
-                <option value="none">None</option>
-                <option value="hor">Horizontal reflection</option>
-                <option value="ver">Vertical reflection</option>
-                <option value="horver" selected>Horizontal and Vertical reflection</option>
-                <option value="90">90 degrees rotation</option>
-                <option value="180">180 degrees rotation</option>
-            </select>
-            <button onclick="initializegrid();">Clear grid</button>
-        </fieldset>
-
-        <p>See <a target="_blank" href="https://en.wikipedia.org/wiki/Symmetry">Symmetry</a> on Wikipedia.</p>
-        <a target="_blank" href="#"><img class="forkme" src="bamboo-fork-250.png" alt="Bamboo fork" title="Fork me!"></a>
+        <a target="_blank" href="https://github.com/Paula-Bean/PaulaWords"><img class="forkme" src="bamboo-fork-250.png" alt="Bamboo fork" title="Fork me!"></a>
     </body>
 </html>
