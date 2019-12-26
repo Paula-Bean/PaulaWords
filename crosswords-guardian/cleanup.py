@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+#
+# Reads the file 'guardian-puzzlewords-withsees.txt' and removes unwanted
+# material from it, combines clues when multiple clues for a word are
+# present, and writes the result to 'guardian-puzzlewords.txt'.
+#
+# Words can have one or more clues:
+#
+# ACCREDITATION
+#   Granting of recognition (13)
+#
+# ACCREDITED
+#   Certified officially (10)
+#
+# ACCRUE
+#   Accumulate (6)
+#   Gather (6)
+#   Grow by addition (6)
+#
+
 import codecs
 import collections
 import re
@@ -19,20 +39,9 @@ for line in codecs.open("guardian-puzzlewords-withsees.txt", "rb", "utf8"):
     else:
         currentword = line.strip()
 
-'''
-for word in sorted(words):
-    # if len(words[word]) == 4:
-    print word
-    for clue in words[word]:
-        print " ", clue
-    print
-'''
-
-
-if 1:
-    with codecs.open("guardian-puzzlewords.txt", "wb", "utf8") as f:
-        for word in sorted(words):
-            f.write(word + "\n")
-            for clue in sorted(words[word]):
-                f.write("  " + clue + "\n")
-            f.write("\n")
+with codecs.open("guardian-puzzlewords.txt", "wb", "utf8") as f:
+    for word in sorted(words):
+        f.write(word + "\n")
+        for clue in sorted(words[word]):
+            f.write("  " + clue + "\n")
+        f.write("\n")
