@@ -28,11 +28,9 @@ for word in sorted(words):
     print
 '''
 
-
-if 1:
-    with codecs.open("guardian-puzzlewords.txt", "wb", "utf8") as f:
-        for word in sorted(words):
-            f.write(word + "\n")
-            for clue in sorted(words[word]):
-                f.write("  " + clue + "\n")
-            f.write("\n")
+with codecs.open("guardian-puzzlewords.txt", "wb", "utf8") as f:
+    for word in sorted(words):
+        f.write(word + "\n")
+        for clue in sorted(words[word]):
+            f.write("  " + clue + "\n")
+        f.write("\n")
