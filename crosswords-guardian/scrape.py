@@ -11,14 +11,13 @@
 #
 # There are also other puzzle types, ex. https://www.theguardian.com/crosswords/cryptic/27506
 
-from bs4 import BeautifulSoup
-import json
-import re
-import os
-import glob
-import collections
-import urllib.request, urllib.error
 import codecs
+import collections
+import glob
+import json
+import os
+import urllib.request, urllib.error
+from bs4 import BeautifulSoup
                     
 # Which range of puzzles you want to scrape. Currently this can range from
 # 9093 to 15486, though you might want to limit these numbers when testing
@@ -27,6 +26,7 @@ import codecs
 first = 9093
 last = 15486
     
+first, last = 9245, 9245
 # first, last = 9093, 9095
 # first, last = 15484, 15486
   
@@ -56,37 +56,23 @@ for nr in range(first, last + 1):
 # Parse & collect
 words = collections.defaultdict(set) # Mapping from word -> set of clues
 
-reparentheses = re.compile("(.*) \((.*)\)")
-
 print("Parsing...")
 for fn in glob.glob("pages/*"):
     print(fn)
     data = open(fn, "rb").read()
     soup = BeautifulSoup(data, "html.parser")
     div = soup.find("div", "js-crossword")
+    if not div:
+        print("    crossword not found")
+        continue
     data = div["data-crossword-data"]
     d = json.loads(data)
     for entry in d["entries"]:
         word = entry["solution"].strip()
         clue = entry["clue"].strip()
-        '''
-        # TODO: Some clues also contain HTML tags: cleanup        
-        # TODO: multiword clues/word skip?
-        # TODO: anagram skip?
-        # TODO: some words contain only spaces?
-        # TODO: clues like 'See 12' can be skipped
-        # TODO: some words only have a clue like 'See 13'
-        # All the above things can also be done by the consumer of the output file.
-        
-        m = reparentheses.match(clue)
-        if m:
-            clue = m.group(1)
-            lengts = m.group(2)
-            if "-" in lengths or "," in lengths: ...
-            if "(anag)" in clue:
-        '''
         words[word].add(clue)
-
+    print(f"    {len(words)} words")
+    
 with codecs.open("guardian-puzzlewords-withsees.txt", "wb", "utf8") as f:
     for word in sorted(words):
         f.write(word + "\n")
